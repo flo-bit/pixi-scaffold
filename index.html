@@ -1,0 +1,80 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.1.0/pixi.min.js"></script>
+  </head>
+  <body style="overflow: hidden">
+    <script>
+      class PiXI_SCAFFOLD {
+        constructor() {
+          let w = window.innerWidth,
+            h = window.innerHeight;
+
+          this.app = new PIXI.Application({
+            width: w,
+            height: h,
+            antialias: true,
+            transparent: false,
+            resolution: 1,
+          });
+          this.keys = {};
+          document.addEventListener("keydown", this.keyDown.bind(this));
+          document.addEventListener("keyup", this.keyUp.bind(this));
+          window.addEventListener("resize", this.windowResized.bind(this));
+
+          this.setupScene();
+          this.app.view.style.position = "absolute";
+          this.app.view.style.top = "0px";
+          this.app.view.style.left = "0px";
+
+          document.body.appendChild(this.app.view);
+          let ticker = PIXI.Ticker.shared;
+          ticker.add(this.animate.bind(this));
+        }
+
+        setupScene() {
+          /* setup your scene here */
+          let radius =
+            Math.min(this.app.screen.width, this.app.screen.height) / 3;
+          /* START */
+          this.circle = new PIXI.Graphics();
+          this.circle.beginFill(0xaa0000);
+          this.circle.drawCircle(0, 0, radius / 5);
+          this.circle.endFill();
+          this.app.stage.addChild(this.circle);
+
+          this.circle.x = this.app.screen.width / 2 + radius * Math.cos(0);
+          this.circle.y = this.app.screen.height / 2 + radius * Math.sin(0);
+          /* END */
+        }
+        animate() {
+          /* Update your scene here */
+          let elapsed = PIXI.Ticker.shared.elapsedMS / 1000.0;
+          let total = PIXI.Ticker.shared.lastTime / 1000.0;
+
+          /* START */
+          let radius =
+            Math.min(this.app.screen.width, this.app.screen.height) / 3;
+          this.circle.x = this.app.screen.width / 2 + radius * Math.cos(total);
+          this.circle.y = this.app.screen.height / 2 + radius * Math.sin(total);
+          /* END */
+        }
+
+        windowResized() {
+          this.app.renderer.resize(window.innerWidth, window.innerHeight);
+        }
+        keyDown(event) {
+          this.keys[event.key] = true;
+        }
+        keyUp(event) {
+          this.keys[event.key] = false;
+        }
+      }
+      let app = new PiXI_SCAFFOLD();
+    </script>
+  </body>
+</html>
