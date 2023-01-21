@@ -21,6 +21,13 @@
             transparent: false,
             resolution: 1,
           });
+
+          this.w = 1000;
+          this.h = 500;
+
+          this.root = new PIXI.Container();
+          this.app.stage.addChild(this.root);
+          this.resizeRoot();
           this.keys = {};
           document.addEventListener("keydown", this.keyDown.bind(this));
           document.addEventListener("keyup", this.keyUp.bind(this));
@@ -38,17 +45,24 @@
 
         setupScene() {
           /* setup your scene here */
-          let radius =
-            Math.min(this.app.screen.width, this.app.screen.height) / 3;
+          let radius = Math.min(this.w, this.h) / 3;
           /* START */
+
+          this.rect = new PIXI.Graphics();
+          this.rect.beginFill(0x0000aa);
+          this.rect.drawRect(-this.w / 2, -this.h / 2, this.w, this.h);
+          this.rect.endFill();
+          this.rect.alpha = 0.2;
+          this.root.addChild(this.rect);
+
           this.circle = new PIXI.Graphics();
-          this.circle.beginFill(0xaa0000);
+          this.circle.beginFill(0x440000);
           this.circle.drawCircle(0, 0, radius / 5);
           this.circle.endFill();
-          this.app.stage.addChild(this.circle);
+          this.root.addChild(this.circle);
 
-          this.circle.x = this.app.screen.width / 2 + radius * Math.cos(0);
-          this.circle.y = this.app.screen.height / 2 + radius * Math.sin(0);
+          this.circle.x = (this.w * Math.cos(0)) / 3;
+          this.circle.y = (this.h * Math.sin(0)) / 3;
           /* END */
         }
         animate() {
@@ -57,15 +71,26 @@
           let total = PIXI.Ticker.shared.lastTime / 1000.0;
 
           /* START */
-          let radius =
-            Math.min(this.app.screen.width, this.app.screen.height) / 3;
-          this.circle.x = this.app.screen.width / 2 + radius * Math.cos(total);
-          this.circle.y = this.app.screen.height / 2 + radius * Math.sin(total);
+          this.circle.x = (this.w * Math.cos(total)) / 3;
+          this.circle.y = (this.h * Math.sin(total)) / 3;
           /* END */
+        }
+
+        resizeRoot() {
+          let w = window.innerWidth,
+            h = window.innerHeight;
+          let scl = Math.min(w / this.w, h / this.h);
+
+          this.root.position.x = w / 2;
+          this.root.position.y = h / 2;
+
+          this.root.scale.x = scl;
+          this.root.scale.y = scl;
         }
 
         windowResized() {
           this.app.renderer.resize(window.innerWidth, window.innerHeight);
+          this.resizeRoot();
         }
         keyDown(event) {
           this.keys[event.key] = true;
