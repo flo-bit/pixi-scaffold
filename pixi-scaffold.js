@@ -12,8 +12,8 @@ export default class PixiScaffold {
     this.app.view.style.left = "0px";
     document.body.appendChild(this.app.view);
 
-    this.w = this.w ?? 1000;
-    this.h = this.h ?? 1000;
+    this.w = opts.w ?? 1000;
+    this.h = opts.h ?? 1000;
     this.root = new PIXI.Container();
     this.app.stage.addChild(this.root);
     this.windowResized();
