@@ -5,84 +5,33 @@
       name="viewport"
       content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.1.0/pixi.min.js"></script>
   </head>
-  <body style="overflow: hidden; background-color: black;">
-    <script>
-      class PiXI_SCAFFOLD {
-        constructor() {
-          let w = window.innerWidth,
-            h = window.innerHeight;
-          this.app = new PIXI.Application();
-          this.app.view.style.position = "absolute";
-          this.app.view.style.top = "0px";
-          this.app.view.style.left = "0px";
-          document.body.appendChild(this.app.view);
-
-          this.w = 1000;
-          this.h = 1000;
-          this.root = new PIXI.Container();
-          this.app.stage.addChild(this.root);
-          this.windowResized();
-
-          this.keys = {};
-          document.addEventListener("keydown", this.keyDown.bind(this));
-          document.addEventListener("keyup", this.keyUp.bind(this));
-          window.addEventListener("resize", this.windowResized.bind(this));
-
-          this.setupScene();
-          let ticker = PIXI.Ticker.shared;
-          ticker.add(this.animate.bind(this));
-        }
-        setupScene() {
-          /* setup your scene here */
-          /* START */
+  <body style="overflow: hidden; background-color: black">
+    <script type="module">
+      import PixiScaffold from "./pixi-scaffold.js";
+      class Game {
+        setup(p) {
           this.rect = new PIXI.Graphics();
           this.rect.beginFill(0x0000aa);
-          this.rect.drawRect(-this.w / 2, -this.h / 2, this.w, this.h);
+          this.rect.drawRect(-PS.w / 2, -PS.h / 2, PS.w, PS.h);
           this.rect.endFill();
           this.rect.alpha = 0.2;
-          this.root.addChild(this.rect);
+          p.addChild(this.rect);
 
           this.circle = new PIXI.Graphics();
           this.circle.beginFill(0x440000);
-          this.circle.drawCircle(0, 0, Math.min(this.w, this.h) / 3 / 5);
+          this.circle.drawCircle(0, 0, Math.min(PS.w, PS.h) / 3 / 5);
           this.circle.endFill();
-          this.root.addChild(this.circle);
-          this.circle.x = (this.w * Math.cos(0)) / 3;
-          this.circle.y = (this.h * Math.sin(0)) / 3;
-          /* END */
+          p.addChild(this.circle);
+          this.circle.x = (PS.w * Math.cos(0)) / 3;
+          this.circle.y = (PS.h * Math.sin(0)) / 3;
         }
-        animate() {
-          /* Update your scene here */
-          let elapsed = PIXI.Ticker.shared.elapsedMS / 1000.0;
-          let total = PIXI.Ticker.shared.lastTime / 1000.0;
-          /* START */
-          this.circle.x = (this.w * Math.cos(total)) / 3;
-          this.circle.y = (this.h * Math.sin(total)) / 3;
-          /* END */
-        }
-        resizeRoot() {
-          let w = window.innerWidth,
-            h = window.innerHeight;
-          let scl = Math.min(w / this.w, h / this.h);
-          this.root.position.x = w / 2;
-          this.root.position.y = h / 2;
-          this.root.scale.x = scl;
-          this.root.scale.y = scl;
-        }
-        windowResized() {
-          this.app.renderer.resize(window.innerWidth, window.innerHeight);
-          this.resizeRoot();
-        }
-        keyDown(event) {
-          this.keys[event.key] = true;
-        }
-        keyUp(event) {
-          this.keys[event.key] = false;
+        update(dt, total) {
+          this.circle.x = (PS.w * Math.cos(total)) / 3;
+          this.circle.y = (PS.h * Math.sin(total)) / 3;
         }
       }
-      let app = new PiXI_SCAFFOLD();
+      let app = new PixiScaffold(new Game());
     </script>
   </body>
 </html>
