@@ -29,7 +29,7 @@ export default class PixiScaffold {
       return;
     }
 
-    this.start();
+    this.setup();
   }
 
   load() {
@@ -38,13 +38,20 @@ export default class PixiScaffold {
     }
 
     const texturesPromise = PIXI.Assets.load(Object.keys(this.opts.assets));
-    texturesPromise.then(this.start.bind(this));
+    texturesPromise.then(this.loadingFinished.bind(this));
   }
 
-  start(textures) {
+  loadingFinished(textures) {
     this.textures = textures ?? {};
+    this.setup();
+  }
 
+  setup() {
     if (this.opts.setup) this.opts.setup(this);
+    this.start();
+  }
+
+  start() {
     let ticker = PIXI.Ticker.shared;
     ticker.add(this.animate.bind(this));
   }
