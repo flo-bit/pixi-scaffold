@@ -16,6 +16,7 @@ export default class PixiScaffold {
     this.w = opts.w ?? 1000;
     this.h = opts.h ?? 1000;
     this.root = new PIXI.Container();
+    this.root.sortableChildren = true;
     this.app.stage.addChild(this.root);
     this.windowResized();
 
