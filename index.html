@@ -14,25 +14,27 @@
           star: "./assets/star.png",
         };
         setup() {
-          this.rect = new PIXI.Graphics();
-          this.rect.beginFill(0x0000aa);
-          this.rect.drawRect(-PS.w / 2, -PS.h / 2, PS.w, PS.h);
-          this.rect.endFill();
-          this.rect.alpha = 0.4;
-          PS.addChild(this.rect);
+          PS.add({
+            shape: "rect",
+            w: PS.w,
+            h: PS.h,
+            color: 0x0000aa,
+            alpha: 0.4,
+          });
 
-          this.circle = new PIXI.Graphics();
-          this.circle.beginFill(0x880000);
-          this.circle.drawCircle(0, 0, Math.min(PS.w, PS.h) / 15);
-          this.circle.endFill();
-          this.circle.x = (PS.w * Math.cos(0)) / 3;
-          this.circle.y = (PS.h * Math.sin(0)) / 3;
-          PS.addChild(this.circle);
-
-          this.sprite = new PIXI.Sprite(PS.textures.star);
-          this.sprite.scale.set(1.5);
-          this.sprite.anchor.set(0.5);
-          this.circle.addChild(this.sprite);
+          this.circle = PS.add({
+            shape: "circle",
+            radius: Math.min(PS.w, PS.h) / 15,
+            color: 0x880000,
+            x: (PS.w * Math.cos(0)) / 3,
+            y: (PS.h * Math.sin(0)) / 3,
+            children: [
+              {
+                texture: PS.textures.star,
+                scale: 1.2,
+              },
+            ],
+          });
         }
         update(dt, total) {
           this.circle.x = (PS.w * Math.cos(total)) / 3;
