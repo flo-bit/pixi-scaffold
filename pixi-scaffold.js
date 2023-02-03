@@ -6,7 +6,7 @@ export default class PixiScaffold {
     window.PIXI = PIXI;
     this.opts.PS = this;
     window.PS = this;
-    this.app = new PIXI.Application();
+    this.app = new PIXI.Application(this.opts.renderOptions);
     this.app.view.style.position = "absolute";
     this.app.view.style.top = "0px";
     this.app.view.style.left = "0px";
