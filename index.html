@@ -10,21 +10,29 @@
     <script type="module">
       import PixiScaffold from "./pixi-scaffold.js";
       class Game {
-        setup(p) {
+        assets = {
+          star: "./assets/star.png",
+        };
+        setup() {
           this.rect = new PIXI.Graphics();
           this.rect.beginFill(0x0000aa);
           this.rect.drawRect(-PS.w / 2, -PS.h / 2, PS.w, PS.h);
           this.rect.endFill();
-          this.rect.alpha = 0.2;
-          p.addChild(this.rect);
+          this.rect.alpha = 0.4;
+          PS.addChild(this.rect);
 
           this.circle = new PIXI.Graphics();
-          this.circle.beginFill(0x440000);
-          this.circle.drawCircle(0, 0, Math.min(PS.w, PS.h) / 3 / 5);
+          this.circle.beginFill(0x880000);
+          this.circle.drawCircle(0, 0, Math.min(PS.w, PS.h) / 15);
           this.circle.endFill();
-          p.addChild(this.circle);
           this.circle.x = (PS.w * Math.cos(0)) / 3;
           this.circle.y = (PS.h * Math.sin(0)) / 3;
+          PS.addChild(this.circle);
+
+          this.sprite = new PIXI.Sprite(PS.textures.star);
+          this.sprite.scale.set(1.5);
+          this.sprite.anchor.set(0.5);
+          this.circle.addChild(this.sprite);
         }
         update(dt, total) {
           this.circle.x = (PS.w * Math.cos(total)) / 3;

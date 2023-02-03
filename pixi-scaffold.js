@@ -23,10 +23,31 @@ export default class PixiScaffold {
     document.addEventListener("keyup", this.keyUp.bind(this));
     window.addEventListener("resize", this.windowResized.bind(this));
 
+    if (this.opts.assets) {
+      this.load();
+      return;
+    }
+
+    this.start();
+  }
+
+  load() {
+    for (let k of Object.keys(this.opts.assets)) {
+      PIXI.Assets.add(k, this.opts.assets[k]);
+    }
+
+    const texturesPromise = PIXI.Assets.load(Object.keys(this.opts.assets));
+    texturesPromise.then(this.start.bind(this));
+  }
+
+  start(textures) {
+    this.textures = textures ?? {};
+
     if (this.opts.setup) this.opts.setup(this);
     let ticker = PIXI.Ticker.shared;
     ticker.add(this.animate.bind(this));
   }
+
   animate() {
     /* Update your scene here */
     let elapsed = PIXI.Ticker.shared.elapsedMS / 1000.0;
