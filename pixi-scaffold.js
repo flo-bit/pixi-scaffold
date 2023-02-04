@@ -65,8 +65,8 @@ export default class PixiScaffold {
     if (this.opts.update) this.opts.update(elapsed, total, this);
   }
   resizeRoot() {
-    let w = window.innerWidth,
-      h = window.innerHeight;
+    let w = document.documentElement.clientWidth,
+      h = document.documentElement.clientHeight;
     let scl = Math.min(w / this.w, h / this.h);
     this.root.position.x = w / 2;
     this.root.position.y = h / 2;
@@ -74,7 +74,12 @@ export default class PixiScaffold {
     this.root.scale.y = scl;
   }
   windowResized() {
-    this.app.renderer.resize(window.innerWidth, window.innerHeight);
+    // using clientWidth and clientHeight instead of innerWidth and innerHeight
+    // because of weird ios web app behavior which doesn't update innerWidth and innerHeight immediately
+    this.app.renderer.resize(
+      document.documentElement.clientWidth,
+      document.documentElement.clientHeight
+    );
     this.resizeRoot();
   }
   keyDown(event) {
