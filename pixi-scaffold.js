@@ -90,6 +90,7 @@ export default class PixiScaffold {
   }
   addChild(c) {
     this.root.addChild(c);
+    return c;
   }
   add(c) {
     return PixiUtils.Utils.addChild(this.root, c);
