@@ -13,7 +13,7 @@ class Shape extends PIXI.Graphics {
 
     this._strokeColor = opts.strokeColor ?? opts.stroke;
     this.strokeAlpha = opts.strokeAlpha ?? 1;
-    this.strokeWeight = opts.strokeWeight ?? 1;
+    this.strokeWeight = opts.strokeWeight ?? opts.weight ?? 1;
 
     this.size = new Vector(
       opts.width ?? opts.w ?? opts.size ?? opts.s ?? 100,
@@ -246,6 +246,8 @@ class Text extends PIXI.Text {
         style.c ??
         0xffffff,
       align: style.fontAlign ?? style.textAlign ?? style.align ?? "center",
+      fontWeight:
+        style.fontWeight ?? style.textWeight ?? style.weight ?? "normal",
     });
 
     Utils.applySettings(this, opts);
