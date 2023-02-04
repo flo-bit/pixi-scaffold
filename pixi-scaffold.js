@@ -1,5 +1,5 @@
 import * as PIXI from "https://cdn.jsdelivr.net/npm/pixi.js@7.x/dist/pixi.min.mjs";
-import * as PixiUtils from "https://flo-bit.github.io/pixi-utils/pixi-utils.js";
+import * as PixiUtils from "./pixi-utils.js";
 
 export default class PixiScaffold {
   constructor(opts) {
@@ -96,3 +96,5 @@ export default class PixiScaffold {
     return PixiUtils.Utils.addChild(this.root, c);
   }
 }
+
+export { PixiScaffold, PixiUtils };
