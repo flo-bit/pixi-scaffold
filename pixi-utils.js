@@ -261,11 +261,183 @@ class Text extends PIXI.Text {
 const animatedSpritePresets = {};
 
 class AnimatedSprite extends PIXI.AnimatedSprite {
+  static splitTexture(baseTex, num, vertical) {
+    let w = baseTex.width,
+      h = baseTex.height;
+    let sw = vertical != true ? w / num : w,
+      sh = vertical != true ? h : h / num;
+    let textures = [];
+    for (let i = 0; i < num; i++) {
+      let rect =
+        vertical != true
+          ? new PIXI.Rectangle(sw * i, 0, sw, sh)
+          : new PIXI.Rectangle(0, sh * i, sw, sh);
+      textures.push(new PIXI.Texture(baseTex, rect));
+    }
+    return textures;
+  }
+
   constructor(opts) {
     opts = JSUtils.combine(opts, animatedSpritePresets);
-    super(opts.textures);
+    let textures;
+
+    if (opts.textures) {
+      textures = opts.textures;
+    } else if (opts.split) {
+      let texture = opts.texture;
+      if (texture == undefined && opts.name) {
+        texture = PS.textures[opts.name];
+      }
+      if (opts.split && texture) {
+        textures = AnimatedSprite.splitTexture(
+          texture,
+          opts.split,
+          opts.splitVertical ?? opts.vertical
+        );
+      } else {
+      }
+    }
+    super(textures);
 
     Utils.applySettings(this, opts);
+
+    this.animationSpeed = opts.animationSpeed ?? opts.speed ?? 1;
+    this.loop = opts.loop ?? opts.loops ?? true;
+
+    if (opts.autoPlay) this.gotoAndPlay(0);
+  }
+
+  add(c) {
+    return Utils.addChild(this, c);
+  }
+}
+
+const animatedContainerPresets = {};
+
+class AnimatedContainer extends PIXI.Container {
+  constructor(opts) {
+    opts = JSUtils.combine(opts, animatedContainerPresets);
+    super();
+
+    Utils.applySettings(this, opts);
+
+    this.animations = {};
+    this.availableAnimations = [];
+    this.currentAnimation = undefined;
+
+    for (const key of Object.keys(opts.animations)) {
+      let data = opts.animations[key];
+
+      data.animationSpeed =
+        data.animationSpeed ??
+        data.speed ??
+        opts.animationSpeed ??
+        opts.speed ??
+        1;
+
+      data.name = data.name ?? key;
+      data.visible = false;
+      data.tint = data.tint ?? opts.tint ?? 0xffffff;
+
+      let sprite = new AnimatedSprite(data);
+
+      this.addChild(sprite);
+      this.animations[key] = sprite;
+
+      if (data.toState) {
+        sprite.onComplete = () => {
+          this.state = data.toState;
+          if (data.complete) data.complete(this);
+        };
+        sprite.loop = false;
+      } else if (data.complete) {
+        sprite.onComplete = () => {
+          data.complete(this);
+        };
+      }
+
+      if (data.start) {
+        sprite.start = data.start;
+      }
+      this.availableAnimations.push(key);
+    }
+    if (opts.start) this.state = opts.start;
+  }
+
+  reverse() {
+    this.reversed = !this.reversed;
+    this.scale.x = -this.scale.x;
+  }
+
+  get state() {
+    return this.currentAnimation;
+  }
+  set state(s) {
+    this.show(s);
+  }
+
+  set speed(s) {
+    let mult = s / (this._speed ?? 1);
+    for (let child of this.children) {
+      child.animationSpeed *= mult;
+    }
+    this._speed = s;
+  }
+
+  show(key) {
+    if (this.currentAnimation == key) return;
+
+    if (
+      this.currentAnimation != undefined &&
+      this.animations[this.currentAnimation]
+    ) {
+      this.animations[this.currentAnimation].visible = false;
+    }
+
+    this.currentAnimation = key;
+    if (this.animations[key] == undefined) return;
+
+    this.animations[key].visible = true;
+    if (this.animations[key].start) this.animations[key].start(this);
+    this.animations[key].gotoAndPlay(0);
+  }
+
+  add(c) {
+    return Utils.addChild(this, c);
+  }
+}
+
+const gridPresets = {};
+
+class Grid extends Container {
+  constructor(opts) {
+    opts = JSUtils.combine(opts, gridPresets);
+    super();
+
+    let numX = opts.numX ?? opts.num ?? 1;
+    let numY = opts.numY ?? opts.num ?? 1;
+
+    let spacingX = opts.spacingX ?? opts.spacing ?? 0;
+    let spacingY = opts.spacingY ?? opts.spacing ?? 0;
+
+    for (let x = 0; x < numX; x++) {
+      for (let y = 0; y < numY; y++) {
+        let object = Utils.process(opts.object);
+        object.x = x * (object.width + spacingX);
+        object.y = y * (object.height + spacingY);
+        object.xIndex = x;
+        object.yIndex = y;
+
+        this.add(object);
+      }
+    }
+    Utils.applySettings(this, opts);
+
+    if (opts.center != false) {
+      let rect = this.getLocalBounds();
+      this.x -= (rect.left + rect.right) / 2;
+      this.y -= (rect.top + rect.bottom) / 2;
+    }
   }
 }
 
@@ -366,8 +538,14 @@ class Utils {
     if (child.type == "graphics") {
       return new Graphics(child);
     }
+    if (child.type == "grid") {
+      return new Grid(child);
+    }
 
     // try to find type of object from other properties
+    if (child.animations != undefined) {
+      return new AnimatedContainer(child);
+    }
     if (child.shape != undefined) {
       return new Shape(child);
     }
@@ -385,4 +563,14 @@ class Utils {
   }
 }
 
-export { Shape, Utils, Sprite, Container, Graphics, Text, AnimatedSprite };
+export {
+  Shape,
+  Utils,
+  Sprite,
+  Container,
+  Graphics,
+  Text,
+  AnimatedSprite,
+  AnimatedContainer,
+  Grid,
+};
