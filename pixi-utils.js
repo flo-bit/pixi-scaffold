@@ -15,6 +15,8 @@ class Shape extends PIXI.Graphics {
     this.strokeAlpha = opts.strokeAlpha ?? 1;
     this.strokeWeight = opts.strokeWeight ?? opts.weight ?? 1;
 
+    this.setObservers();
+
     this.size = new Vector(
       opts.width ?? opts.w ?? opts.size ?? opts.s ?? 100,
       opts.height ?? opts.h ?? opts.size ?? opts.s ?? 100
@@ -80,15 +82,24 @@ class Shape extends PIXI.Graphics {
     this.redraw();
   }
 
+  setObservers() {
+    if (this.fillColor?.isColor == true) {
+      this.fillColor.observer = this.redraw.bind(this);
+    }
+    if (this._strokeColor?.isColor == true) {
+      this._strokeColor.observer = this.redraw.bind(this);
+    }
+  }
+
   set color(c) {
-    this.fillColor = c;
-    this.redraw();
+    this.fill = c;
   }
   get color() {
     return this.fillColor;
   }
   set fill(c) {
     this.fillColor = c;
+    this.setObservers();
     this.redraw();
   }
   get fill() {
@@ -97,6 +108,7 @@ class Shape extends PIXI.Graphics {
 
   set stroke(c) {
     this.strokeColor = c;
+    this.setObservers();
   }
   get stroke() {
     return this._strokeColor;
@@ -148,10 +160,14 @@ class Shape extends PIXI.Graphics {
     this.clear();
 
     if (this.fillColor != undefined)
-      this.beginFill(this.fillColor, this.fillAlpha);
+      this.beginFill(this.fillColor?.hex ?? this.fillColor, this.fillAlpha);
 
     if (this._strokeColor != undefined)
-      this.lineStyle(this.strokeWeight, this._strokeColor, this.strokeAlpha);
+      this.lineStyle(
+        this.strokeWeight,
+        this._strokeColor?.hex ?? this.strokeColor,
+        this.strokeAlpha
+      );
 
     if (this.shape == "rect") {
       if (this._cornerRadius <= 0) {
@@ -196,6 +212,23 @@ class Sprite extends PIXI.Sprite {
   add(c) {
     return Utils.addChild(this, c);
   }
+
+  set tintColor(c) {
+    if (c?.isColor == true) {
+      c.observer = this.updateTint.bind(this);
+      this._tintColor = c;
+      this.tint = c.hex;
+    }
+    this.tint = c;
+  }
+
+  get tintColor() {
+    return this._tintColor ?? this.tint;
+  }
+
+  updateTint(t) {
+    super.tint = t?.hex;
+  }
 }
 
 const containerPresets = {};
@@ -210,6 +243,23 @@ class Container extends PIXI.Container {
 
   add(c) {
     return Utils.addChild(this, c);
+  }
+
+  set tintColor(c) {
+    if (c?.isColor == true) {
+      c.observer = this.updateTint.bind(this);
+      this._tintColor = c;
+      this.tint = c.hex;
+    }
+    this.tint = c;
+  }
+
+  get tintColor() {
+    return this._tintColor ?? this.tint;
+  }
+
+  updateTint(t) {
+    super.tint = t?.hex;
   }
 }
 
@@ -310,6 +360,23 @@ class AnimatedSprite extends PIXI.AnimatedSprite {
   add(c) {
     return Utils.addChild(this, c);
   }
+
+  set tintColor(c) {
+    if (c?.isColor == true) {
+      c.observer = this.updateTint.bind(this);
+      this._tintColor = c;
+      this.tint = c.hex;
+    }
+    this.tint = c;
+  }
+
+  get tintColor() {
+    return this._tintColor ?? this.tint;
+  }
+
+  updateTint(t) {
+    super.tint = t?.hex;
+  }
 }
 
 const animatedContainerPresets = {};
@@ -383,6 +450,9 @@ class AnimatedContainer extends PIXI.Container {
     }
     this._speed = s;
   }
+  get speed() {
+    return this._speed;
+  }
 
   show(key) {
     if (this.currentAnimation == key) return;
@@ -441,6 +511,224 @@ class Grid extends Container {
   }
 }
 
+class Color {
+  /**
+   *
+   * @param {number} r - red component, between 0 and 1
+   * @param {number} g - green component, between 0 and 1
+   * @param {number} b - blue component, between 0 and 1
+   */
+  constructor(r, g, b) {
+    this._r = r;
+    this._g = g;
+    this._b = b;
+
+    this.isColor = true;
+
+    this.observer = undefined;
+
+    this.checkComponents();
+  }
+
+  static hex(hex) {
+    return new Color(
+      ((hex >> 16) & 0xff) / 255,
+      ((hex >> 8) & 0xff) / 255,
+      (hex & 0xff) / 255
+    );
+  }
+
+  static rgb(r, g, b) {
+    return new Color(r, g, b);
+  }
+
+  static hsl(h, s, l) {
+    let color = new Color(0, 0, 0);
+    color.hsl = { h: h, s: s, l: l };
+    return color;
+  }
+
+  checkComponents() {
+    this._r = Math.max(0, Math.min(1, this._r));
+    this._g = Math.max(0, Math.min(1, this._g));
+    this._b = Math.max(0, Math.min(1, this._b));
+
+    if (this.observer) this.observer(this);
+  }
+
+  set rgb(rgb) {
+    this._r = rgb.r;
+    this._g = rgb.g;
+    this._b = rgb.b;
+    this.checkComponents();
+  }
+
+  set r(r) {
+    this._r = r;
+    this.checkComponents();
+  }
+  get r() {
+    return this._r;
+  }
+  set g(g) {
+    this._g = g;
+    this.checkComponents();
+  }
+  get g() {
+    return this._g;
+  }
+  set b(b) {
+    this._b = b;
+    this.checkComponents();
+  }
+  get b() {
+    return this._b;
+  }
+
+  get hex() {
+    return ((this.r * 255) << 16) + ((this.g * 255) << 8) + this.b * 255;
+  }
+  set hex(hex) {
+    this.r = ((hex >> 16) & 0xff) / 255;
+    this.g = ((hex >> 8) & 0xff) / 255;
+    this.b = (hex & 0xff) / 255;
+    this.checkComponents();
+  }
+
+  get h() {
+    return this.hue;
+  }
+  set h(h) {
+    this.hue = h;
+  }
+  get s() {
+    return this.saturation;
+  }
+  set s(s) {
+    this.saturation = s;
+  }
+  get l() {
+    return this.lightness;
+  }
+  set l(l) {
+    this.lightness = l;
+  }
+
+  get hue() {
+    return this.hsl.h;
+  }
+  set hue(hue) {
+    let hsl = this.hsl;
+    hsl.h = hue;
+    this.hsl = hsl;
+  }
+
+  get saturation() {
+    return this.hsl.s;
+  }
+  set saturation(saturation) {
+    let hsl = this.hsl;
+    hsl.s = saturation;
+    this.hsl = hsl;
+  }
+
+  get lightness() {
+    return this.hsl.l;
+  }
+  set lightness(lightness) {
+    let hsl = this.hsl;
+    hsl.l = lightness;
+    this.hsl = hsl;
+  }
+
+  /**
+   * Converts an RGB color value to HSL. Conversion formula
+   * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+   * Assumes r, g, and b are contained in the set [0, 1] and
+   * returns {h: number, s:number, l:number} in the set [0, 1].
+   *
+   * @param   {number}  r       The red color value
+   * @param   {number}  g       The green color value
+   * @param   {number}  b       The blue color value
+   * @return  {object}           The HSL representation
+   */
+  get hsl() {
+    this.checkComponents();
+    let r = this.r,
+      g = this.g,
+      b = this.b;
+    let max = Math.max(r, g, b),
+      min = Math.min(r, g, b);
+    let h,
+      s,
+      l = (max + min) / 2;
+
+    if (max == min) {
+      h = s = 0; // achromatic
+    } else {
+      var d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r:
+          h = (g - b) / d + (g < b ? 6 : 0);
+          break;
+        case g:
+          h = (b - r) / d + 2;
+          break;
+        case b:
+          h = (r - g) / d + 4;
+          break;
+      }
+      h /= 6;
+    }
+
+    return { h: h, s: s, l: l };
+  }
+  /**
+   * Converts an HSL color value to RGB. Conversion formula
+   * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+   * Assumes h, s, and l are keys of hsl and contained in the set [0, 1] and
+   * sets r, g, and b to numbers in the set [0, 0].
+   *
+   * @param   {number}  h       The hue
+   * @param   {number}  s       The saturation
+   * @param   {number}  l       The lightness
+   * @return  {Array}           The RGB representation
+   */
+  set hsl(hsl) {
+    let r, g, b;
+    let h = hsl.h - Math.floor(hsl.h),
+      s = hsl.s,
+      l = hsl.l;
+
+    if (s == 0) {
+      r = g = b = l; // achromatic
+    } else {
+      var hue2rgb = function hue2rgb(p, q, t) {
+        if (t < 0) t += 1;
+        if (t > 1) t -= 1;
+        if (t < 1 / 6) return p + (q - p) * 6 * t;
+        if (t < 1 / 2) return q;
+        if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+        return p;
+      };
+
+      var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      var p = 2 * l - q;
+      r = hue2rgb(p, q, h + 1 / 3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1 / 3);
+    }
+
+    this.r = r;
+    this.g = g;
+    this.b = b;
+
+    this.checkComponents();
+    return this;
+  }
+}
+
 class Utils {
   static applySettings(obj, opts) {
     obj.alpha = opts.alpha ?? 1;
@@ -460,7 +748,7 @@ class Utils {
       );
     }
 
-    obj.tint = opts.tint ?? 0xffffff;
+    obj.tintColor = opts.tint ?? 0xffffff;
     obj.scale.set(
       opts.scaleX ?? opts.scale ?? 1,
       opts.scaleY ?? opts.scale ?? 1
@@ -546,6 +834,9 @@ class Utils {
     if (child.animations != undefined) {
       return new AnimatedContainer(child);
     }
+    if (child.split != undefined || child.speed != undefined) {
+      return new AnimatedSprite(child);
+    }
     if (child.shape != undefined) {
       return new Shape(child);
     }
@@ -573,4 +864,5 @@ export {
   AnimatedSprite,
   AnimatedContainer,
   Grid,
+  Color,
 };

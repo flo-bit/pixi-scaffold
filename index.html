@@ -14,31 +14,29 @@
           star: "./assets/star.png",
         };
         setup() {
-          PS.add({
+          this.background = PS.add({
             shape: "rect",
             w: PS.w,
             h: PS.h,
-            color: 0x0000aa,
-            alpha: 0.4,
+            color: Color.hsl(0, 0.3, 0.1),
+            alpha: 1,
           });
 
           this.circle = PS.add({
             shape: "circle",
-            radius: Math.min(PS.w, PS.h) / 15,
-            color: 0x880000,
+            s: 200,
+            corner: 30,
+            color: Color.hsl(0, 1, 0.3),
             x: (PS.w * Math.cos(0)) / 3,
             y: (PS.h * Math.sin(0)) / 3,
-            children: [
-              {
-                texture: PS.textures.star,
-                scale: 1.2,
-              },
-            ],
           });
         }
         update(dt, total) {
           this.circle.x = (PS.w * Math.cos(total)) / 3;
           this.circle.y = (PS.h * Math.sin(total)) / 3;
+
+          this.circle.fill.hue = total * 0.1;
+          this.background.fill.hue = total * 0.1;
         }
       }
       let app = new PixiScaffold(new Game());
