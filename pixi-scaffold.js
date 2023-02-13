@@ -2,6 +2,10 @@ import * as PIXI from "https://cdn.jsdelivr.net/npm/pixi.js@7.x/dist/pixi.min.mj
 import * as PixiUtils from "./pixi-utils.js";
 
 export default class PixiScaffold {
+  static run(opts) {
+    return new PixiScaffold(opts);
+  }
+
   constructor(opts) {
     this.opts = opts ?? {};
     window.PIXI = PIXI;
