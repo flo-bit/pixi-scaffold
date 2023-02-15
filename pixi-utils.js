@@ -84,9 +84,11 @@ class Shape extends PIXI.Graphics {
 
   setObservers() {
     if (this.fillColor?.isColor == true) {
+      this.fillColor = this.fillColor.clone();
       this.fillColor.observer = this.redraw.bind(this);
     }
     if (this._strokeColor?.isColor == true) {
+      this._strokeColor = this._strokeColor.clone();
       this._strokeColor.observer = this.redraw.bind(this);
     }
   }
@@ -528,6 +530,10 @@ class Color {
     this.observer = undefined;
 
     this.checkComponents();
+  }
+
+  clone() {
+    return new Color(this._r, this._g, this._b);
   }
 
   static hex(hex) {
