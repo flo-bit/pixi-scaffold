@@ -813,8 +813,6 @@ class Utils {
       return child;
     }
 
-    child = JSUtils.deepClone(child);
-
     // try to find type of object from type property
     if (child.type == "container") {
       return new Container(child);
