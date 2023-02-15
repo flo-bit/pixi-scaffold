@@ -800,6 +800,7 @@ class Utils {
     if (typeof child == "function") {
       child = child(child);
     }
+    child = JSUtils.deepClone(child);
 
     if (child == undefined) return;
     // check if child is already a pixi object
