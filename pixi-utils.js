@@ -800,13 +800,14 @@ class Utils {
     if (typeof child == "function") {
       child = child(child);
     }
-    child = JSUtils.deepClone(child);
 
     if (child == undefined) return;
     // check if child is already a pixi object
     if (child.isSprite != undefined) {
       return child;
     }
+
+    child = JSUtils.deepClone(child);
 
     // try to find type of object from type property
     if (child.type == "container") {
