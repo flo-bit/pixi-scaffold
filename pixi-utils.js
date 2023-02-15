@@ -1,6 +1,6 @@
 import * as PIXI from "https://cdn.jsdelivr.net/npm/pixi.js@7.x/dist/pixi.min.mjs";
-import JSUtils from "https://flo-bit.github.io/js-utils/utils.js";
-import Vector from "https://flo-bit.github.io/js-utils/vector.js";
+import JSUtils from "../js-utils/utils.js";
+import Vector from "../js-utils/vector.js";
 
 const shapePresets = {};
 
